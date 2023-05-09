@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <style>
+        body {
+            background: #373b44;
+            background: -webkit-linear-gradient(to right, #373b44, #4286f4);
+            background: linear-gradient(to right, #373b44, #4286f4);
+        }
+
+        .btn {
+            background-color: #2C5364;
+            color: #fff;
+            font-size: medium;
+        }
+
+        .btn:hover,
+        .btn:active {
+            background-color: #0F2027;
+            color: #fff;
+            font-size: medium;
+        }
+
+        .small {
+            font-size: small;
+            padding: 0.4rem;
+            border-radius: 0.8rem;
+        }
+
+        .small:hover,
+        .small:active {
+            font-size: small;
+            padding: 0.4rem;
+        }
+    </style>
+    <title>Expense Tracker</title>
+</head>
+
+<body>
+    <header>
+        <div class="container-fluid d-flex justify-content-between align-items-center py-3">
+            <h1>Expense Tracker</h1>
+            <div class="d-flex justify-content-center align-items-center">
+                <a href="#" class="btn mx-1">Generate Report</a>
+                <div class="text-center ms-5">
+                    <h3 class="logged-user mx-2 mb-0">
+                    </h3>
+                    <h6 class="premium-text border border-1 p-1 bg-primary-subtle m-0 rounded-3">Premium Member
+                    </h6>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="d-flex flex-column container mt-2 align-items-end">
+        <div class="container bg-light rounded-2" style="height:70vh">
+            <div class="card-header d-flex justify-content-around">
+                <h2 class="text-center">Expense Report</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered border-primary">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Expense Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td colspan="2">Larry the Bird</td>
+                            <td>@twitter</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer mt-3">
+            <button class="btn">Download Report</button>
+            <button class="btn">Generate Monthly Report</button>
+            <button class="btn">Generate Yearly Report</button>
+        </div>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
+        integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+        integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+        crossorigin="anonymous"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            let pageNumber = 1;
+            if (token) {
+                try {
+                    const response = await axios.get(`http://localhost:3000/premium/expenses`, { headers: { 'Authorization': token } });
+                    console.log(response);
+                    const data = response.data.response.expenseResponse;
+                    document.querySelector('.logged-user').textContent = response.data.response.username;
+                    setPremium(response.data.response.ispremium);
+                    expenseList.innerHTML = '';
+                    data.rows.forEach(expense => {
+                        generateHTML(expense.id, expense.amount, expense.description, expense.category);
+                    })
+                    pagination.innerHTML = '';
+                    if (pageNumber) {
+                        pagination.innerHTML = `<li class="page-item mx-2"><button class="page-link btn">${pageNumber}</button></li>`;
+                    }
+                    if (data.count > (pageNumber * itemsPerPage)) {
+                        pagination.innerHTML += `<li class="page-item mx-2"><button class="page-link btn">${pageNumber + 1}</button></li>`
+                    }
+                    if (pageNumber > 1) {
+                        pagination.innerHTML = `<li class="page-item mx-2"><button class="page-link btn">${pageNumber - 1}</button></li>` + pagination.innerHTML;
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                alert("Please Login");
+                window.location.href = 'http://localhost:3000/login.html';
+            }
+
+        })
+
+    </script>
+</body>
+
+</html>
